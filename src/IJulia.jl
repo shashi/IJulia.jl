@@ -1,7 +1,7 @@
 module IJulia
 
 # in the IPython front-end, enable verbose output via IJulia.set_verbose()
-verbose = false
+verbose = true
 function set_verbose(v=true)
     global verbose::Bool = v
 end

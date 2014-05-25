@@ -1,11 +1,15 @@
 # workaround #60:
+
 @osx_only ENV["PATH"] = JULIA_HOME*":"*ENV["PATH"]
 
 include("IJulia.jl")
 include("inline.jl")
-
+#include("interactive.jl")
+try
 using IPythonDisplay
+#using IJReactiveDisplay
 pushdisplay(InlineDisplay())
+#pushdisplay(ReactiveDisplay())
 
 using IJulia
 
@@ -26,3 +30,7 @@ delete!(task_local_storage(),:SOURCE_PATH)
 eval(Base, :(is_interactive = true))
 
 IJulia.waitloop()
+
+catch e
+    @vprintln("ERROR ", e)
+end
