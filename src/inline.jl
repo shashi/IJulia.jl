@@ -1,12 +1,16 @@
 module IPythonDisplay
 
 using IJulia
+using React
+using SignalManager
+
 import IJulia: send_ipython, publish, msg_pub, execute_msg, display_dict, displayqueue, undisplay
 
 import Base: display, redisplay
-export display, redisplay, InlineDisplay, undisplay
+export display, redisplay, InlineDisplay, ReactiveDisplay, undisplay
 
 immutable InlineDisplay <: Display end
+immutable ReactiveDisplay <: Display end
 
 # supported MIME types for inline display in IPython, in descending order
 # of preference (descending "richness")
@@ -14,11 +18,11 @@ const ipy_mime = [ "text/html", "text/latex", "image/svg+xml", "image/png", "ima
 
 for mime in ipy_mime
     @eval begin
-        function display(d::InlineDisplay, ::MIME{symbol($mime)}, x)
+        function display(d::InlineDisplay, ::MIME{symbol($mime)}, x, metadata=Dict())
             send_ipython(publish, 
                          msg_pub(execute_msg, "display_data",
                                  ["source" => "julia", # optional
-                                  "metadata" => Dict(), # optional
+                                  "metadata" => metadata, # optional
                                   "data" => [$mime => stringmime(MIME($mime), x)] ]))
         end
     end
@@ -29,12 +33,12 @@ display(d::InlineDisplay, m::MIME"application/x-latex", x) = display(d, MIME("te
 
 # override display to send IPython a dictionary of all supported
 # output types, so that IPython can choose what to display.
-function display(d::InlineDisplay, x)
+function display(d::InlineDisplay, x, metadata=Dict())
     undisplay(x) # dequeue previous redisplay(x)
     send_ipython(publish, 
                  msg_pub(execute_msg, "display_data",
                          ["source" => "julia", # optional
-                          "metadata" => Dict(), # optional
+                          "metadata" => metadata, # optional
                           "data" => display_dict(x) ]))
 end
 
@@ -54,6 +58,19 @@ function display()
     for x in q
         display(x)
     end
+end
+
+# Reactive display functions
+function display{T}(d::ReactiveDisplay, x::Signal{T})
+    start_update(x)
+    display(x.value, metadata = {reactive=>true,
+                                 signal_id=>x.id})
+end
+
+function display{T}(d::ReactiveDisplay, m::MIME, x::Signal{T})
+    start_update(x, m)
+    display(m, x.value, metadata = {reactive=>true,
+                                    signal_id=>x.id})
 end
 
 end # module

@@ -2,10 +2,12 @@
 @osx_only ENV["PATH"] = JULIA_HOME*":"*ENV["PATH"]
 
 include("IJulia.jl")
+include("signalmanager.jl")
 include("inline.jl")
 
 using IPythonDisplay
 pushdisplay(InlineDisplay())
+pushdisplay(ReactiveDisplay())
 
 using IJulia
 
