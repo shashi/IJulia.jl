@@ -11,6 +11,8 @@ function send_status(state::String)
 end
 
 include("execute_request.jl")
+include("comm_manager.jl")
+using CommManager
 
 function complete_request(socket, msg)
     text = msg.content["text"]
@@ -100,4 +102,7 @@ const handlers = (String=>Function)[
     "connect_request" => connect_request,
     "shutdown_request" => shutdown_request,
     "history_request" => history_request,
+    "comm_open" => comm_open,
+    "comm_msg" => comm_msg,
+    "comm_close" => comm_close
 ]
