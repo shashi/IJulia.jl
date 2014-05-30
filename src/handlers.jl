@@ -11,8 +11,8 @@ function send_status(state::String)
 end
 
 include("execute_request.jl")
-include("comm_manager.jl")
-using CommManager
+using IJulia.CommManager
+
 
 function complete_request(socket, msg)
     text = msg.content["text"]

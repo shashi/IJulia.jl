@@ -1,13 +1,15 @@
 module CommManager
 
-import IJulia
+using IJulia
 export Comm, msg_comm, send_comm, close_comm, on_msg,
        on_close, register_target, comm_msg, comm_open, comm_close
+
 
 immutable Comm{target}
     id::String
     primary::Bool
 end
+
 
 function Comm(t)
     # Create a new primary Comm with target t
@@ -28,10 +30,10 @@ Comm(t, id, primary=false) = Comm{symbol(t)}(id, primary)
 const comms               = Dict{String, Comm}()
 const comm_msg_handlers   = Dict{Comm, Function}()
 const comm_close_handlers = Dict{Comm, Function}()
-const parents             = Dict{Comm, Msg}()
+const parents             = Dict{Comm, IJulia.Msg}()
 
 
-function msg_comm(comm::Comm, m::Msg, msg_type,
+function msg_comm(comm::Comm, m::IJulia.Msg, msg_type,
                   data=Dict{String,Any}(),
                   metadata=Dict{String, Any}(); kwargs...)
     content = ["comm_id"=>comm.id,
@@ -45,6 +47,7 @@ function msg_comm(comm::Comm, m::Msg, msg_type,
                    metadata=metadata)
 end
 
+
 function send_comm(comm::Comm, data::Dict,
                    metadata::Dict = Dict(); kwargs...)
     parent = get!(parents, comm, execute_msg)
@@ -53,6 +56,7 @@ function send_comm(comm::Comm, data::Dict,
     send_ipython(publish, msg)
     parents[comm] = msg
 end
+
 
 function close_comm(comm::Comm, data::Dict = Dict(),
                     metadata::Dict = Dict(); kwargs...)
@@ -63,6 +67,7 @@ function close_comm(comm::Comm, data::Dict = Dict(),
     parents[comm] = msg
 end
 
+
 function on_msg(comm::Comm, f::Function)
     comm_msg_handlers[comm] = f
 
@@ -72,13 +77,16 @@ function on_close(comm::Comm, f::Function)
     comm_close_handlers[comm] = f
 end
 
-function register_comm(comm::Comm, data::Dict() = Dict())
+
+function register_comm(comm::Comm, data::Dict = Dict())
     # no-op, widgets must override for their targets.
     # Method dispatch on Comm{t} serves
     # the purpose of register_target in IPEP 21.
 end
 
+
 # handlers for incoming comm_* messages
+
 function comm_open(sock, msg)
     if haskey("comm_id", msg.content)
         comm_id = msg.content["comm_id"]
@@ -99,6 +107,7 @@ function comm_open(sock, msg)
     end
 end
 
+
 function comm_msg(sock, msg)
     if haskey("comm_id", msg.content)
         comm_id = msg.content["comm_id"]
@@ -117,6 +126,7 @@ function comm_msg(sock, msg)
         parents[comm] = msg
     end
 end
+
 
 function comm_close(sock, msg)
     if haskey("comm_id", msg.content)
@@ -137,5 +147,6 @@ function comm_close(sock, msg)
         end
     end
 end
+
 
 end # module
