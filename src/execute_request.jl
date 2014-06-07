@@ -20,7 +20,11 @@ end
 
 # return a String=>Any dictionary to attach as metadata
 # in IPython display_data and pyout messages
-metadata(x) = Dict()
+function metadata(x)
+    print(" ") # FIXME: This seems to be needed
+    Dict()
+end
+
 
 # return a String=>String dictionary of mimetype=>data for passing to
 # IPython display_data and pyout messages.
