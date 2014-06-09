@@ -142,14 +142,12 @@ function comm_close(sock, msg)
                 msg.content["data"] = {}
             end
             comm_close_handlers[comm](msg)
-            pop!(comm_close_handlers, comm)
+            delete!(comm_close_handlers, comm)
         end
         if haskey(comm_msg_handlers, comm)
-            pop!(comm_msg_handlers, comm)
+            delete!(comm_msg_handlers, comm)
         end
-        if haskey(comms, comm.id)
-            pop!(comms, comm.id)
-        end
+        delete!(comms, comm.id)
     end
 end
 
