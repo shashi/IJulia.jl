@@ -95,7 +95,7 @@ function comm_open(sock, msg)
         comm_id = msg.content["comm_id"]
         if haskey(msg.content, "target_name")
             target = msg.content["target_name"]
-            if ~haskey(msg.content, "data")
+            if !haskey(msg.content, "data")
                 msg.content["data"] = Dict()
             end
             comm = Comm(symbol(target), comm_id)
@@ -123,7 +123,7 @@ function comm_msg(sock, msg)
             return
         end
         if haskey(comm_msg_handlers, comm)
-            if ~haskey(msg.content, "data")
+            if !haskey(msg.content, "data")
                 msg.content["data"] = Dict()
             end
             comm_msg_handlers[comm](msg)
@@ -138,8 +138,8 @@ function comm_close(sock, msg)
         comm_id = msg.content["comm_id"]
         comm = comms[comm_id]
         if haskey(comm, comm_close_handlers)
-            if ~haskey(msg.content, "comm_id")
-                msg.content["d ata"] = {}
+            if !haskey(msg.content, "data")
+                msg.content["data"] = {}
             end
             comm_close_handlers[comm](msg)
             pop!(comm_close_handlers, comm)
