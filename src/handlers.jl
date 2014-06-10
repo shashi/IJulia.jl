@@ -1,16 +1,6 @@
-function send_status(state::String)
-    msg = Msg(
-        [ "status" ],
-        [ "msg_id" => uuid4(),
-          "username" => "jlkernel",
-          "session" => uuid4(),
-          "msg_type" => "status" ],
-        [ "execution_state" => state ]
-    )
-    send_ipython(publish, msg)
-end
-
 include("execute_request.jl")
+using IJulia.CommManager
+
 
 function complete_request(socket, msg)
     text = msg.content["text"]
@@ -100,4 +90,7 @@ const handlers = (String=>Function)[
     "connect_request" => connect_request,
     "shutdown_request" => shutdown_request,
     "history_request" => history_request,
+    "comm_open" => comm_open,
+    "comm_msg" => comm_msg,
+    "comm_close" => comm_close
 ]

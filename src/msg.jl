@@ -82,3 +82,14 @@ function recv_ipython(socket)
     return m
 end
 
+function send_status(state::String)
+    msg = Msg(
+        [ "status" ],
+        [ "msg_id" => uuid4(),
+          "username" => "jlkernel",
+          "session" => uuid4(),
+          "msg_type" => "status" ],
+        [ "execution_state" => state ]
+    )
+    send_ipython(publish, msg)
+end

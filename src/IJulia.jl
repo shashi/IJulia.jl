@@ -45,6 +45,7 @@ end
 include("hmac.jl") # must go after profile is initialized
 include("stdio.jl")
 include("msg.jl")
+include("comm_manager.jl")
 include("history.jl")
 include("handlers.jl")
 
