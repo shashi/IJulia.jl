@@ -16,12 +16,13 @@ end
 
 function Comm(t)
     # Create a new primary Comm with target t, and a new id
-    comm = Comm{symbol(t), symbol(uuid4())}(true)
+    id = symbol(uuid4())
+    comm = Comm{symbol(t), id}(true)
     # Request a secondary Comm object in the frontend
     send_ipython(IJulia.publish,
                  msg_comm(comm, IJulia.execute_msg, "comm_open",
                           Dict(), target_name=string(t)))
-    comms[comm.id] = comm
+    comms[id] = comm
     return comm
 end
 
@@ -33,14 +34,14 @@ comm_id{target, id}(comm :: Comm{target, id}) = id
 comm_target{target, id}(comm :: Comm{target, id}) = target
 
 
-const comms   = Dict{String, Comm}()
+const comms   = Dict{Symbol, Comm}()
 const parents = Dict{Comm, IJulia.Msg}()
 
 
 function msg_comm(comm::Comm, m::IJulia.Msg, msg_type,
                   data=Dict{String,Any}(),
                   metadata=Dict{String, Any}(); kwargs...)
-    content = ["comm_id"=>comm.id,
+    content = ["comm_id"=>comm_id(comm),
                "data"=>data]
 
     for (k, v) in kwargs
@@ -90,13 +91,13 @@ end
 function comm_open(sock, msg)
     if haskey(msg.content, "comm_id")
         send_status("busy")
-        comm_id = msg.content["comm_id"]
+        comm_id = symbol(msg.content["comm_id"])
         if haskey(msg.content, "target_name")
             target = msg.content["target_name"]
             if !haskey(msg.content, "data")
                 msg.content["data"] = Dict()
             end
-            comm = Comm(target, comm_id)
+            comm = Comm{target, comm_id}()
             register_comm(comm, msg)
             comms[comm_id] = comm
         else
@@ -114,7 +115,7 @@ end
 function comm_msg(sock, msg)
     if haskey(msg.content, "comm_id")
         send_status("busy")
-        comm_id = msg.content["comm_id"]
+        comm_id = symbol(msg.content["comm_id"])
         if haskey(comms, comm_id)
             comm = comms[comm_id]
         else
@@ -135,7 +136,7 @@ end
 function comm_close(sock, msg)
     if haskey(msg.content, "comm_id")
         send_status("busy")
-        comm_id = msg.content["comm_id"]
+        comm_id = symbol(msg.content["comm_id"])
         comm = comms[comm_id]
 
         if !haskey(msg.content, "data")
@@ -145,7 +146,7 @@ function comm_close(sock, msg)
 
         delete!(comms, comm.id)
         delete!(parents, comm)
-        send_status("idle")    
+        send_status("idle")
     end
 end
 

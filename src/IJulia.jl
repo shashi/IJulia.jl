@@ -42,13 +42,6 @@ else
     end
 end
 
-include("hmac.jl") # must go after profile is initialized
-include("stdio.jl")
-include("msg.jl")
-include("comm_manager.jl")
-include("history.jl")
-include("handlers.jl")
-
 const ctx = Context()
 const publish = Socket(ctx, PUB)
 const raw_input = Socket(ctx, ROUTER)
@@ -61,6 +54,14 @@ bind(requests, "$(profile["transport"])://$(profile["ip"]):$(profile["shell_port
 bind(control, "$(profile["transport"])://$(profile["ip"]):$(profile["control_port"])")
 bind(raw_input, "$(profile["transport"])://$(profile["ip"]):$(profile["stdin_port"])")
 bind(heartbeat, "$(profile["transport"])://$(profile["ip"]):$(profile["hb_port"])")
+
+include("hmac.jl") # must go after profile is initialized
+include("stdio.jl")
+include("msg.jl")
+include("execute_request.jl")
+include("comm_manager.jl")
+include("history.jl")
+include("handlers.jl")
 
 include("heartbeat.jl")
 start_heartbeat(heartbeat)

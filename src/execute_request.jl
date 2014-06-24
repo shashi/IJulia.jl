@@ -179,11 +179,19 @@ function execute_request_0x535c5df2(socket, msg)
         display() # flush pending display requests
 
         if result != nothing
-            if isa(result, Signal) println(methods(metadata), metadata(result)) end
-            send_ipython(publish, 
+
+            # Work around a bizarre method dispatch issue. If typeof(result) is
+            # a Signal, metadata(result) should call the metadata(::Signal)
+            # method, but instead it's hell-bent on calling metadata(::Any). The
+            # strange part is that `@which metadata(result)` actually does
+            # return medatata(::Signal). I'm using that as a workaround here.
+            f = @which metadata(result)
+            result_metadata = f.func(result)
+
+            send_ipython(publish,
                          msg_pub(msg, "pyout",
                                  ["execution_count" => _n,
-                                 "metadata" => metadata(result),
+                                 "metadata" => result_metadata,
                                  "data" => display_dict(result) ]))
         end
         
