@@ -85,13 +85,13 @@ function watch_stdio()
 end
 
 import Base.flush
-function flush(io::Base.Pipe)
-    invoke(flush, (super(Base.Pipe),), io)
-    # send any available bytes to IPython (don't use readavailable,
-    # since we don't want to block).
-    if io == STDOUT
-        send_stream(takebuf_string(read_stdout.buffer), "stdout")
-    elseif io == STDERR
-        send_stream(takebuf_string(read_stderr.buffer), "stderr")
-    end
-end
+## function flush(io::Base.Pipe)
+##     invoke(flush, (super(Base.Pipe),), io)
+##     # send any available bytes to IPython (don't use readavailable,
+##     # since we don't want to block).
+##     if io == STDOUT
+##         send_stream(takebuf_string(read_stdout.buffer), "stdout")
+##     elseif io == STDERR
+##         send_stream(takebuf_string(read_stderr.buffer), "stderr")
+##     end
+## end

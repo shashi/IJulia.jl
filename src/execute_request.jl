@@ -1,6 +1,7 @@
 # Handers for execute_request and related messages, which are
 # the core of the IPython protocol: execution of Julia code and
 # returning results.
+using React
 
 #######################################################################
 const text_plain = MIME("text/plain")
@@ -20,7 +21,10 @@ end
 
 # return a String=>Any dictionary to attach as metadata
 # in IPython display_data and pyout messages
-metadata(x) = Dict()
+function metadata(x)
+    print("Setting empty metadata for type ", typeof(x))
+    Dict()
+end
 
 # return a String=>String dictionary of mimetype=>data for passing to
 # IPython display_data and pyout messages.
@@ -175,10 +179,11 @@ function execute_request_0x535c5df2(socket, msg)
         display() # flush pending display requests
 
         if result != nothing
+            if isa(result, Signal) println(methods(metadata), metadata(result)) end
             send_ipython(publish, 
                          msg_pub(msg, "pyout",
                                  ["execution_count" => _n,
-                                 "metadata" => metadata(result), # qtconsole needs this
+                                 "metadata" => metadata(result),
                                  "data" => display_dict(result) ]))
         end
         
