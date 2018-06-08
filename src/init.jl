@@ -110,4 +110,6 @@ function init(args)
 
     send_status("starting")
     global inited = true
+
+    webio_setup()
 end
