@@ -3,14 +3,14 @@ using WebIO
 
 function install_webio_nbextension()
     str1 = String(read(WebIO.bundlepath))
-    cp(WebIO.bundlepath, joinpath("webio-extensions", "webio-nbextension", "webio-bundle.js"), remove_destination=true)
+    cp(WebIO.bundlepath, joinpath("webio-extensions", "webio-nbextension", "webio-bundle.js"), force=true)
     run(`$jupyter nbextension install webio-extensions/webio-nbextension --user`)
     run(`$jupyter nbextension enable webio-nbextension/main --user`)
 end
 
 function install_webio_labextension()
     # required for jupyterlab build
-    cp(WebIO.bundlepath, joinpath("webio-extensions", "webio-bundle.js"), remove_destination=true)
+    cp(WebIO.bundlepath, joinpath("webio-extensions", "webio-bundle.js"), force=true)
 end
 
 const BEGIN_MARKER = "###JULIA-WEBIO-CONFIG-BEGIN"

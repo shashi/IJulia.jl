@@ -4,11 +4,11 @@ using WebIO
 
 import WebIO: AbstractConnection
 
-immutable IJuliaConnection <: AbstractConnection
+struct IJuliaConnection <: AbstractConnection
     comm::CommManager.Comm
 end
 
-function Base.send(c::IJuliaConnection, data)
+function WebIO.send(c::IJuliaConnection, data)
     send_comm(c.comm, data)
 end
 
@@ -23,9 +23,10 @@ function webio_setup()
         # copy of WebIO and IJulia. 
         return
     end
+    prefix = WebIO.baseurl[] * "/" * AssetRegistry.register(WebIO.assetpath)
 
-    display(HTML("<script class='js-collapse-script' src='pkg/WebIO/webio/dist/bundle.js'></script>"))
-    display(HTML("<script class='js-collapse-script' src='pkg/WebIO/providers/ijulia_setup.js'></script>"))
+    display(HTML("<script class='js-collapse-script' src='$prefix/webio/dist/bundle.js'></script>"))
+    display(HTML("<script class='js-collapse-script' src='$prefix/providers/ijulia_setup.js'></script>"))
 
     display(HTML("""
       <script class='js-collapse-script'>
